@@ -1,7 +1,7 @@
 package spring.controller;
 
 /**
- * Created by srinath medala on 3/31/16.
+ * Created by @author srinath medala on 3/31/16.
  */
 
 import org.springframework.beans.factory.annotation.Autowired;

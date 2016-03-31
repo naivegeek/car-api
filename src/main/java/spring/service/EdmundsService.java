@@ -1,7 +1,7 @@
 package spring.service;
 
 /**
- * Created by srinathmedala on 3/31/16.
+ * Created by @author srinath medala on 3/31/16.
  */
 public interface EdmundsService {
 

@@ -8,6 +8,9 @@ import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
  
+/**
+ * Created by @author srinath medala on 3/31/16.
+ */
 public class AppInitializer implements WebApplicationInitializer {
  
     public void onStartup(ServletContext container) throws ServletException {

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import spring.service.EdmundsService;
 
 /**
- * Created by srinathmedala on 3/31/16.
+ * Created by @author srinath medala on 3/31/16.
  */
 @Service("edmundsService")
 public class EdmundsServiceImpl implements EdmundsService {
@@ -28,7 +28,7 @@ public class EdmundsServiceImpl implements EdmundsService {
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(json);
             if(jsonObject.get("make")!=null){
-                Map make = (Map)jsonObject.getJSONObject("make");
+                Map make = (Map)jsonObject.getOrDefault("make", null);
                 System.out.println("make: "+make);
             }
             return json;
