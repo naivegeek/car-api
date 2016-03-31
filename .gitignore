@@ -1,3 +1,8 @@
+/.project
+/.classpath
+/target
+/.idea
+/.settings
 /target/
 /edmunds-rest-app.iml
 /edmunds.iml
