@@ -7,7 +7,10 @@ import okhttp3.Response;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import spring.dto.CarDTO;
 import spring.service.EdmundsService;
@@ -21,25 +24,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service("edmundsService")
 public class EdmundsServiceImpl implements EdmundsService {
 
+    static Logger log = LoggerFactory.getLogger(EdmundsServiceImpl.class);
+
     public String getCarInfo(String vin) {
         String url = "https://api.edmunds.com/api/vehicle/v2/vins/" + vin
                 + "?fmt=json&api_key=ymg7mstwnse27aar9259tn7q";
+        String json = null;
         try {
-            String json = makeHttpRequest(url);
+            json = makeHttpRequest(url);
             if (json != null) {
                 CarDTO car = new CarDTO();
                 car = tranformJSONRespone(json);
-                car = getReviews(car);
-                car = getAverageCustomerRating(car);
+                if (car != null && StringUtils.hasText(car.getMake()) && StringUtils.hasText(car.getModel())
+                        && (car.getYear() != null)) {
+                    car = getEditorialReviews(car);
+                    car = getAverageCustomerRating(car);
+                }
                 if (car != null) {
                     json = convertToJSON(car);
                 }
             }
-            return json;
         } catch (Exception e) {
-
+            log.error(" Error in making a call to Edmunds REST API: {} ", url, e.getMessage());
         }
-        return null;
+        return json;
     }
 
     private CarDTO tranformJSONRespone(String json) throws Exception {
@@ -81,11 +89,10 @@ public class EdmundsServiceImpl implements EdmundsService {
         return jsonInString;
     }
 
-    private CarDTO getReviews(CarDTO dto) {
+    private CarDTO getEditorialReviews(CarDTO dto) {
+        String editorialUrl = "https://api.edmunds.com/v1/content/editorreviews?make=" + dto.getMake() + "&model="
+                + dto.getModel() + "&year=" + dto.getYear() + "&fmt=json&api_key=ymg7mstwnse27aar9259tn7q";
         try {
-            String editorialUrl = "https://api.edmunds.com/v1/content/editorreviews?make=" + dto.getMake() + "&model="
-                    + dto.getModel() + "&year=" + dto.getYear() + "&fmt=json&api_key=ymg7mstwnse27aar9259tn7q";
-
             String json = makeHttpRequest(editorialUrl);
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(json);
@@ -96,17 +103,16 @@ public class EdmundsServiceImpl implements EdmundsService {
                 }
             }
         } catch (Exception e) {
-
+            log.error(" Error in making a call to Edmunds REST API: {} ", editorialUrl, e.getMessage());
         }
         return dto;
 
     }
 
     private CarDTO getAverageCustomerRating(CarDTO dto) {
+        String customerReviewUrl = "https://api.edmunds.com/api/vehiclereviews/v2/" + dto.getMake().toLowerCase() + "/"
+                + dto.getModel().toLowerCase() + "/" + dto.getYear() + "?fmt=json&api_key=ymg7mstwnse27aar9259tn7q";
         try {
-
-            String customerReviewUrl = "https://api.edmunds.com/api/vehiclereviews/v2/" + dto.getMake().toLowerCase() + "/"
-                    + dto.getModel().toLowerCase() + "/" + dto.getYear() + "?fmt=json&api_key=ymg7mstwnse27aar9259tn7q";
             String json = makeHttpRequest(customerReviewUrl);
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(json);
@@ -115,7 +121,7 @@ public class EdmundsServiceImpl implements EdmundsService {
                 dto.setAverageConsumerRating(averageRating);
             }
         } catch (Exception e) {
-
+            log.error(" Error in making a call to Edmunds REST API: {} ", customerReviewUrl, e.getMessage());
         }
         return dto;
     }
@@ -130,7 +136,7 @@ public class EdmundsServiceImpl implements EdmundsService {
                 json = response.body().string();
             }
         } catch (Exception e) {
-
+            log.error(" Error in making a call to Edmunds REST API: {} ", url, e.getMessage());
         }
         return json;
     }
