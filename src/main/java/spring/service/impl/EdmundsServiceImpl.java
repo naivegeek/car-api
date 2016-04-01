@@ -25,13 +25,12 @@ public class EdmundsServiceImpl implements EdmundsService {
         String url = "https://api.edmunds.com/api/vehicle/v2/vins/" + vin
                 + "?fmt=json&api_key=ymg7mstwnse27aar9259tn7q";
         try {
-            OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder().url(url).build();
-            Response response = client.newCall(request).execute();
-            String json = response.body().string();
+            String json = makeHttpRequest(url);
             if (json != null) {
                 CarDTO car = new CarDTO();
                 car = tranformJSONRespone(json);
+                car = getReviews(car);
+                car = getAverageCustomerRating(car);
                 if (car != null) {
                     json = convertToJSON(car);
                 }
@@ -80,5 +79,59 @@ public class EdmundsServiceImpl implements EdmundsService {
         ObjectMapper mapper = new ObjectMapper();
         String jsonInString = mapper.writeValueAsString(dto);
         return jsonInString;
+    }
+
+    private CarDTO getReviews(CarDTO dto) {
+        try {
+            String editorialUrl = "https://api.edmunds.com/v1/content/editorreviews?make=" + dto.getMake() + "&model="
+                    + dto.getModel() + "&year=" + dto.getYear() + "&fmt=json&api_key=ymg7mstwnse27aar9259tn7q";
+
+            String json = makeHttpRequest(editorialUrl);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(json);
+            if (jsonObject != null) {
+                JSONObject editorial = (JSONObject) jsonObject.get("editorial");
+                if (editorial != null) {
+                    dto.setEditorReview((String) editorial.get("edmundsSays"));
+                }
+            }
+        } catch (Exception e) {
+
+        }
+        return dto;
+
+    }
+
+    private CarDTO getAverageCustomerRating(CarDTO dto) {
+        try {
+
+            String customerReviewUrl = "https://api.edmunds.com/api/vehiclereviews/v2/" + dto.getMake().toLowerCase() + "/"
+                    + dto.getModel().toLowerCase() + "/" + dto.getYear() + "?fmt=json&api_key=ymg7mstwnse27aar9259tn7q";
+            String json = makeHttpRequest(customerReviewUrl);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(json);
+            if (jsonObject != null) {
+                String averageRating = (String) jsonObject.get("averageRating");
+                dto.setAverageConsumerRating(averageRating);
+            }
+        } catch (Exception e) {
+
+        }
+        return dto;
+    }
+
+    private String makeHttpRequest(String url) {
+        String json = null;
+        try {
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder().url(url).build();
+            Response response = client.newCall(request).execute();
+            if (response != null) {
+                json = response.body().string();
+            }
+        } catch (Exception e) {
+
+        }
+        return json;
     }
 }
