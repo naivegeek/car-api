@@ -29,9 +29,13 @@ public class EdmundsServiceImpl implements EdmundsService {
             Request request = new Request.Builder().url(url).build();
             Response response = client.newCall(request).execute();
             String json = response.body().string();
-            CarDTO car = new CarDTO();
-            car = tranformJSONRespone(json);
-            json = convertToJSON(car);
+            if (json != null) {
+                CarDTO car = new CarDTO();
+                car = tranformJSONRespone(json);
+                if (car != null) {
+                    json = convertToJSON(car);
+                }
+            }
             return json;
         } catch (Exception e) {
 
@@ -60,13 +64,13 @@ public class EdmundsServiceImpl implements EdmundsService {
                 }
             }
             JSONObject mpg = (JSONObject) jsonObject.get("MPG");
-            if(mpg!=null){
-                car.setCityMpg((String)mpg.get("city"));
-                car.setHighwayMpg((String)mpg.get("highway"));
+            if (mpg != null) {
+                car.setCityMpg((String) mpg.get("city"));
+                car.setHighwayMpg((String) mpg.get("highway"));
             }
             JSONObject engine = (JSONObject) jsonObject.get("engine");
-            if(engine!=null){
-                car.setEngineFuelType((String)engine.get("type"));
+            if (engine != null) {
+                car.setEngineFuelType((String) engine.get("type"));
             }
         }
         return car;
