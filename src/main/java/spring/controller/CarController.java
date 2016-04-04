@@ -5,6 +5,7 @@ package spring.controller;
  */
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,7 +21,7 @@ import spring.service.EdmundsService;
 
 @Api(value = "cars", description = "Api related to Car operations")
 @RestController("carController")
-@RequestMapping("/cars")
+@RequestMapping("/vehicle")
 public class CarController {
 
     @Autowired
@@ -46,7 +47,8 @@ public class CarController {
             @ApiResponse(code = 400, message = "Invalid request params")})
     public
     @ResponseBody
-    String getCarInfo(@PathVariable("vin")String vin) {
+    String getCarInfo(@PathVariable("vin")String vin, HttpRequest httpRequest) {
+
         return edmundsService.getCarInfo(vin);
     }
 
